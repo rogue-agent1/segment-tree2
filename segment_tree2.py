@@ -1,33 +1,37 @@
 #!/usr/bin/env python3
-"""segment_tree2 - Segment tree for range min/max/sum queries."""
-import sys, math
+"""Segment tree — range queries and point updates in O(log n)."""
+import sys
+
 class SegTree:
-    def __init__(self, arr, op=min, identity=float('inf')):
-        self.n = len(arr); self.op = op; self.id = identity
-        self.tree = [identity] * (4 * self.n)
-        self._build(arr, 1, 0, self.n - 1)
-    def _build(self, arr, node, start, end):
-        if start == end: self.tree[node] = arr[start]; return
-        mid = (start + end) // 2
-        self._build(arr, 2*node, start, mid); self._build(arr, 2*node+1, mid+1, end)
-        self.tree[node] = self.op(self.tree[2*node], self.tree[2*node+1])
+    def __init__(self, data, fn=min, default=float('inf')):
+        self.n = len(data); self.fn, self.default = fn, default
+        self.tree = [default]*(4*self.n)
+        self._build(data, 1, 0, self.n-1)
+    def _build(self, data, node, l, r):
+        if l == r: self.tree[node] = data[l]; return
+        m = (l+r)//2
+        self._build(data, 2*node, l, m); self._build(data, 2*node+1, m+1, r)
+        self.tree[node] = self.fn(self.tree[2*node], self.tree[2*node+1])
+    def _query(self, node, l, r, ql, qr):
+        if qr < l or r < ql: return self.default
+        if ql <= l and r <= qr: return self.tree[node]
+        m = (l+r)//2
+        return self.fn(self._query(2*node, l, m, ql, qr), self._query(2*node+1, m+1, r, ql, qr))
     def query(self, l, r): return self._query(1, 0, self.n-1, l, r)
-    def _query(self, node, start, end, l, r):
-        if r < start or end < l: return self.id
-        if l <= start and end <= r: return self.tree[node]
-        mid = (start + end) // 2
-        return self.op(self._query(2*node, start, mid, l, r), self._query(2*node+1, mid+1, end, l, r))
-    def update(self, idx, val): self._update(1, 0, self.n-1, idx, val)
-    def _update(self, node, start, end, idx, val):
-        if start == end: self.tree[node] = val; return
-        mid = (start + end) // 2
-        if idx <= mid: self._update(2*node, start, mid, idx, val)
-        else: self._update(2*node+1, mid+1, end, idx, val)
-        self.tree[node] = self.op(self.tree[2*node], self.tree[2*node+1])
-if __name__ == "__main__":
-    arr = [3,1,4,1,5,9,2,6,5,3]
-    if len(sys.argv) > 1: arr = [int(x) for x in sys.argv[1].split(",")]
-    for name, op, ident in [("Min", min, float('inf')), ("Max", max, float('-inf')), ("Sum", lambda a,b: a+b, 0)]:
-        st = SegTree(arr, op, ident)
-        print(f"{name} query [2,7]: {st.query(2, 7)}")
-    print(f"Array: {arr}")
+    def _update(self, node, l, r, i, val):
+        if l == r: self.tree[node] = val; return
+        m = (l+r)//2
+        if i <= m: self._update(2*node, l, m, i, val)
+        else: self._update(2*node+1, m+1, r, i, val)
+        self.tree[node] = self.fn(self.tree[2*node], self.tree[2*node+1])
+    def update(self, i, val): self._update(1, 0, self.n-1, i, val)
+
+def main():
+    arr = [1, 3, 5, 7, 9, 11]
+    st = SegTree(arr); print(f"Array: {arr}")
+    print(f"Min [1..4]: {st.query(1,4)}")
+    st.update(3, 2); print(f"After update [3]=2, Min [1..4]: {st.query(1,4)}")
+    st2 = SegTree(arr, fn=lambda a,b: a+b, default=0)
+    print(f"Sum [0..5]: {st2.query(0,5)}")
+
+if __name__ == "__main__": main()

@@ -1,11 +1,9 @@
-# segment-tree2
+# Segment Tree
 
-Segment tree for range queries.
-
-Zero dependencies. Python 3.8+.
+Segment Tree — zero-dependency Python implementation.
 
 ## Usage
 
 ```bash
-python3 segment_tree2.py --help
+python3 segment_tree2.py demo
 ```
