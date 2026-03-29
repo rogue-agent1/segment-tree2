@@ -1,9 +1,10 @@
 # segment-tree2
 
-Segment tree for range queries and updates. Zero-dependency, single-file Python CLI.
+Single-file Python CLI. Zero dependencies.
 
 ## Usage
 
 ```bash
-python3 segment_tree2.py --help
+python3 segment_tree2.py
+python3 segment_tree2.py test
 ```
